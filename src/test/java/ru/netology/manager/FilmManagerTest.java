@@ -2,12 +2,23 @@ package ru.netology.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.netology.domain.AfishaFilm;
-import ru.netology.manager.FilmManager;
+import ru.netology.repository.FilmRepository;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-public class FilmManagerTest {
-    private FilmManager manager = new FilmManager(10);
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+
+@ExtendWith(MockitoExtension.class)
+class FilmManagerTest {
+    @Mock
+    private FilmRepository filmRepository;
+    @InjectMocks
+    FilmManager manager;
     private AfishaFilm first = new AfishaFilm(1, 1, "first", "thriller", "url1");
     private AfishaFilm second = new AfishaFilm(2, 2, "second", "melodrama", "url2");
     private AfishaFilm third = new AfishaFilm(3, 3, "third", "comedy", "url3");
@@ -38,55 +49,44 @@ public class FilmManagerTest {
     }
 
     @Test
-    public void shouldGetAll() {
-        FilmManager manager = new FilmManager();
-        manager.add(first);
-        manager.add(second);
-        AfishaFilm[] actual = manager.getAll();
-        AfishaFilm[] expected = new AfishaFilm[]{second, first};
+    public void GetAll() {
+        // настройка заглушки
+        AfishaFilm[] returned = new AfishaFilm[]{first, second, third};
+        doReturn(returned).when(filmRepository).findAll();
+
+        AfishaFilm[] expected = new AfishaFilm[]{first, second, third};
+        AfishaFilm[] actual = manager.showAll();
         assertArrayEquals(expected, actual);
     }
 
     @Test
-    public void shouldPostTenFilms() {
-        FilmManager manager = new FilmManager();
-        manager.add(first);
-        manager.add(second);
-        manager.add(third);
-        manager.add(forth);
-        manager.add(fifth);
-        manager.add(sixth);
-        manager.add(seventh);
-        manager.add(eighth);
-        manager.add(ninth);
-        manager.add(tenth);
-        manager.add(eleventh);
-        manager.add(twelfth);
+    void showAll() {
+        AfishaFilm[] returned = new AfishaFilm[]{first, second, third};
+        doReturn(returned).when(filmRepository).findAll();
+        // вывод в прямом порядке
+        AfishaFilm[] expected = new AfishaFilm[]{first, second, third};
+        AfishaFilm[] actual = manager.showAll();
+        assertArrayEquals(expected, actual);
+    }
 
-        AfishaFilm[] actual = manager.getPostLength();
+    @Test
+    void getNumberedLastAdded() {
+        AfishaFilm[] returned = new AfishaFilm[]{first, second, third, forth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth};
+        doReturn(returned).when(filmRepository).findAll();
+        // вывод 10 фильмов из 12 в обратном порядке
         AfishaFilm[] expected = new AfishaFilm[]{twelfth, eleventh, tenth, ninth, eighth, seventh, sixth, fifth, forth, third};
+        AfishaFilm[] actual = manager.getAll();
         assertArrayEquals(expected, actual);
-
     }
 
     @Test
-    public void shouldReturnSomeFilms() {
-        FilmManager manager = new FilmManager(5);
-        manager.add(first);
-        manager.add(second);
+    void add() {
+        AfishaFilm[] returned = new AfishaFilm[]{first, second, third};
+        doReturn(returned).when(filmRepository).findAll();
+        doNothing().when(filmRepository).save(third);
         manager.add(third);
-        manager.add(forth);
-        manager.add(fifth);
-        manager.add(sixth);
-        manager.add(seventh);
-        manager.add(eighth);
-        manager.add(ninth);
-        manager.add(tenth);
-        manager.add(eleventh);
-        manager.add(twelfth);
-
-        AfishaFilm[] expected = new AfishaFilm[]{twelfth, eleventh, tenth, ninth, eighth};
-        AfishaFilm[] actual = manager.getPostLength();
+        AfishaFilm[] expected = new AfishaFilm[]{third, second, first};
+        AfishaFilm[] actual = manager.getAll();
         assertArrayEquals(expected, actual);
     }
 }
